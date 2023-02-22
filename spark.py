@@ -2,6 +2,8 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
 import csv
+from time import sleep
+
 
 
 # Define the schema of the incoming Kafka stream
@@ -43,14 +45,14 @@ writer = csv.writer(f)
 def process_row(row):
     f = open('./op.csv', 'a')
     writer = csv.writer(f)
-    writer.writerow(type(row))
+    writer.writerow(row)
+    f.close()
+
 
 query = df \
-    .writeStream.foreach(process_row).start()
+    .writeStream.foreach(process_row).start().awaitTermination()
     # .outputMode("append") \
     # .format("csv") \
     # .option("path", "output") \
     # .option("checkpointLocation", "checkpoint") \
     # .start()
-
-query.awaitTermination()
